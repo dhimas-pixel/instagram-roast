@@ -55,7 +55,7 @@ class InstagramController extends Controller
 
                 try {
                     $generateContent = $client->geminiPro()->generateContent(
-                        new TextPart("Tolong roastin akun instagram ini: {$jsonEncode}")
+                        new TextPart("Tolong roastin akun instagram ini: {$jsonEncode} dengan paragraf yang singkat")
                     );
 
                     $answer = $generateContent->text();
