@@ -6,20 +6,22 @@ use GeminiAPI\Client;
 use GeminiAPI\Resources\Parts\TextPart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class InstagramController extends Controller
 {
-    public function index()
+    public function index(): \Illuminate\Contracts\View\Factory|\Illuminate\Foundation\Application|\Illuminate\Contracts\View\View|\Illuminate\Contracts\Foundation\Application
     {
         return view('home');
     }
-    public function scrapeInstagramProfile(Request $request)
+    public function scrapeInstagramProfile(Request $request): \Illuminate\Http\JsonResponse
     {
         $request->validate([
             'username' => 'required',
         ]);
 
         $username = $request->input('username');
+        Log::info('Request validated by username: ' . $request->input('username'));
 
         // Set the headers for Instagram API request
         $headers = [
@@ -33,7 +35,7 @@ class InstagramController extends Controller
         try {
             // Request to Instagram API
             $response = Http::withHeaders($headers)->get("https://i.instagram.com/api/v1/users/web_profile_info/?username={$username}");
-
+            Log::info('Instagram API Response:', $response->json());
             // Check if the request was successful
             if ($response->successful()) {
                 $data = $response->json();
@@ -50,7 +52,7 @@ class InstagramController extends Controller
                 ];
 
                 $client = new Client(env('GEMINI_API_KEY'));
-
+                Log::info('Gemini API Client Initialized.');
                 $jsonEncode = json_encode($scrapedPayload);
 
                 try {
@@ -79,6 +81,7 @@ class InstagramController extends Controller
             }
         } catch (\Exception $e) {
             // Handle general errors
+            Log::error('Error fetching Instagram data:', ['exception' => $e]);
             return response()->json(['error' => 'An error occurred while fetching data from Instagram'], 500);
         }
     }
